@@ -1,0 +1,38 @@
+#!/bin/bash
+
+VE_NAME='{{ ve_name}}'
+VE_SRC_FILE='{{ ve_src_file }}'
+VE_FOLDER='{{ hostvars['vro-lab-vsphere'].vro_folder }}'
+VCENTER_IP='{{ hostvars['vro-lab-vsphere'].vro_ip }}'
+VCENTER_DC='{{ hostvars['vro-lab-vsphere'].vro_dc }}'
+VCENTER_CLUSTER='{{ hostvars['vro-lab-vsphere'].vro_cluster }}'
+VCENTER_DSTORE='{{ hostvars['vro-lab-vsphere'].vro_dstore }}'
+VCENTER_USER='{{ hostvars['vro-lab-vsphere'].vro_username }}'
+VCENTER_PASS='{{ hostvars['vro-lab-vsphere'].vro_password }}'
+BIGIP_MGMT='{{ ve_mgmt_ip }}'
+BIGIP_MGMT_GW='{{ve_mgmt_gw }}'
+BIGIP_ROOT_PASS='{{ ve_root_pass }}'
+BIGIP_ADMIN_PASS='{{ ve_admin_pass }}'
+
+ovftool \
+--sourceType=OVA \
+--acceptAllEulas \
+--noSSLVerify \
+--skipManifestCheck \
+--X:logToConsole \
+--datastore=$VCENTER_DSTORE \
+--name=$VE_NAME \
+--vmFolder=$VE_FOLDER \
+--deploymentOption='dualcpu' \
+--net:'Internal={{ ve_net_int }}' \
+--net:'External={{ ve_net_ext }}' \
+--net:'HA={{ ve_net_ha }}' \
+--net:'Management={{ ve_net_mgmt }}' \
+--X:injectOvfEnv \
+--prop:net.mgmt.addr=$BIGIP_MGMT \
+--prop:net.mgmt.gw=$BIGIP_MGMT_GW \
+--prop:user.root.pwd=$BIGIP_ROOT_PASS \
+--prop:user.admin.pwd=$BIGIP_ADMIN_PASS \
+$VE_SRC_FILE \
+"vi://$VCENTER_USER:$VCENTER_PASS@$VCENTER_IP/$VCENTER_DC/host/$VCENTER_CLUSTER"
+

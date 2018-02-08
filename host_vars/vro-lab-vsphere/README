@@ -1,0 +1,12 @@
+vault.yaml content (password = "default")
+
+
+---
+vro_dc: datacenter-name 
+vro_cluster: cluster-name
+vro_dstore: datastore-name
+vro_username: person@vsphere.domain
+vro_password: Really.secure.
+vro_folder: folder-name
+vro_ip: my.dotted.quad.here
+

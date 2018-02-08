@@ -1,0 +1,6 @@
+[vro-lab-orchestration]
+vro-lab-vsphere
+
+[vro-lab-hosts]
+vro-lab-hv01
+vro-lab-hv02

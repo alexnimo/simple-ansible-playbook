@@ -1,0 +1,68 @@
+---
+- hosts: localhost
+  tasks:
+  - name: populate template for ovftool run
+    template: src=templates/deploy_ova.bash.j2 dest=/tmp/deploy_ova.bash
+    vars:
+      ve_name: rstahl-ve-001
+      ve_mgmt_ip: "{{ hostvars[ve_name].ve_mgmt_ip }}"
+      ve_mgmt_gw: "{{ hostvars[ve_name].ve_mgmt_gw }}"
+      ve_root_pass: "{{ hostvars[ve_name].ve_root_pass }}"
+      ve_admin_pass: "{{ hostvars[ve_name].ve_admin_pass }}"
+      ve_src_file: "{{ hostvars[ve_name].ve_src_file }}"
+      ve_net_ext: "{{ hostvars[ve_name].ve_net_ext }}"
+      ve_net_int: "{{ hostvars[ve_name].ve_net_int }}"
+      ve_net_ha: "{{ hostvars[ve_name].ve_net_ha }}"
+      ve_net_mgmt: "{{ hostvars[ve_name].ve_net_mgmt }}"
+  
+  - name: deploy big-ip using ovftool
+    command: bash /tmp/deploy_ova.bash
+
+- hosts: vro-lab-vsphere
+  connection: local
+  tasks:
+  - name: power on deployed big-ip by name 
+    vmware_guest:
+      # http://docs.ansible.com/ansible/latest/vmware_guest_module.html
+      hostname: vro-lab-vsphere
+      username: "{{ vro_username }}"
+      password: "{{ vro_password }}"
+      validate_certs: no
+      datacenter: "{{ vro_dc }}"
+      folder: "{{ vro_dc}}/vm/{{ vro_folder }}"
+      name: rstahl-ve-001
+      state: poweredon
+
+- hosts: localhost
+  tasks:
+  - name: unconditional 300s wait
+    wait_for: timeout=300
+  
+  - name: wait for openssh on big-ip
+    wait_for:
+      port: 22
+      host: rstahl-ve-001
+      search_regex: OpenSSH
+      delay: 10
+      state: started
+
+
+- hosts: localhost  
+  tasks:
+  - name: set big-ip hostname
+    bigip_hostname:
+      # http://docs.ansible.com/ansible/latest/bigip_hostname_module.html
+      hostname: "{{ ve_name }}.disposable.local"
+      server: "{{ ve_mgmt_ip }}"
+      user: "admin"
+      password: "{{ ve_admin_pass }}"
+    vars:
+      ve_name: rstahl-ve-001
+      ve_mgmt_ip: "{{ hostvars[ve_name].ve_mgmt_ip_no_mask }}"
+      ve_mgmt_gw: "{{ hostvars[ve_name].ve_mgmt_gw }}"
+      ve_root_pass: "{{ hostvars[ve_name].ve_root_pass }}"
+      ve_admin_pass: "{{ hostvars[ve_name].ve_admin_pass }}"
+      ve_src_file: "{{ hostvars[ve_name].ve_src_file }}"
+
+    # delegate_to: localhost
+
