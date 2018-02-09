@@ -1,0 +1,6 @@
+The following software is required for this example to work:
+* Ansible >= 2.4 - VMware modules
+* pyVmomi - latest version from pip
+* f5-sdk - latest version from pip
+* VMware ovftool - https://www.vmware.com/support/developer/ovf/
+
